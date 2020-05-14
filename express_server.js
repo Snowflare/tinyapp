@@ -96,7 +96,8 @@ app.post("/login", (req, res) => {
   
   if (isEmail(req.body.email)){
     if (isPassword(req.body.email, req.body.password)) {
-      req.session.user_id = findId(req.body.email);
+      //req.session.user_id = findId(req.body.email);
+      req.session.user_id = getUserByEmail(req.body.email, users).id;
       res.redirect('/urls');
     } else {
       res.status(403).send('Invalid password');
@@ -162,6 +163,7 @@ function isUser(id){
   }
   return false;
 }
+
 // Check if email exists in the database
 function isEmail(email){
   for (let user in users){
@@ -181,13 +183,22 @@ function isPassword(email, password){
   return false;
 }
 // Find the id of a corresponding email
-function findId(email){
-  for (let user in users){
-    if (users[user].email === email){
-      return user;
+// function findId(email){
+//   for (let user in users){
+//     if (users[user].email === email){
+//       return user;
+//     }
+//   }
+// }
+
+const getUserByEmail = function(email, database) {
+  // lookup magic...
+  for (let user in database){
+    if (database[user].email === email){
+      return database[user];
     }
   }
-}
+};
 // Return the urls belongs to given id
 function filter( dataBase, id) {
   let result = {};
