@@ -86,7 +86,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // Editing a URL
 // app.get("/u/:shortURL/edit", (req, res) => {
 //   let templateVars = { user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-//   res.render("urls_show", templateVars);
+//   res.render("urls_R", templateVars);
 // });
 app.post("/u/:shortURL/edit", (req, res) => {
   if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].user_id){
@@ -140,6 +140,9 @@ app.post("/register", (req, res) => {
   
 });
 
+// Helper functions
+//------------------------------------------------/
+// Random string generator
 function generateRandomString() {
   var result           = '';
   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -148,12 +151,14 @@ function generateRandomString() {
   }
   return result;
 }
+// Check if user exists in the database
 function isUser(id){
   if(users[id]){
     return true;
   }
   return false;
 }
+// Check if email exists in the database
 function isEmail(email){
   for (let user in users){
     if (users[user].email === email){
@@ -162,6 +167,7 @@ function isEmail(email){
   }
   return false;
 }
+// Check if the email and password match
 function isPassword(email, password){
   for (let user in users){
     if (users[user].email === email && users[user].password === password){
@@ -170,6 +176,7 @@ function isPassword(email, password){
   }
   return false;
 }
+// Find the id of a corresponding email
 function findId(email){
   for (let user in users){
     if (users[user].email === email){
@@ -177,6 +184,7 @@ function findId(email){
     }
   }
 }
+// Return the urls belongs to given id
 function filter( dataBase, id) {
   let result = {};
 
