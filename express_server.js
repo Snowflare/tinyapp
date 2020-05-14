@@ -1,4 +1,5 @@
 const express = require("express");
+const getUserByEmail = require("./helpers")
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
@@ -191,14 +192,7 @@ function isPassword(email, password){
 //   }
 // }
 
-const getUserByEmail = function(email, database) {
-  // lookup magic...
-  for (let user in database){
-    if (database[user].email === email){
-      return database[user];
-    }
-  }
-};
+
 // Return the urls belongs to given id
 function filter( dataBase, id) {
   let result = {};
