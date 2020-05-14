@@ -1,5 +1,5 @@
 const express = require("express");
-const getUserByEmail = require("./helpers")
+const { getUserByEmail } = require("./helpers")
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
@@ -75,8 +75,12 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   if (isUser(req.session.user_id)){
     if (urlDatabase[req.params.shortURL]){
-      let templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
-      res.render("urls_show", templateVars);
+      if (urlDatabase[req.params.shortURL].user_id === req.session.user_id){
+        let templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+        res.render("urls_show", templateVars);
+      } else {
+        res.status('403').send('You do not have access to this url');
+      }      
     } else {
       res.status(403).send('This url does not exist')
     }    
