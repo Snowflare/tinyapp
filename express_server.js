@@ -50,11 +50,12 @@ app.get("/hello", (req, res) => {
 });
 // Route of database
 app.get("/urls", (req, res) => {
-  if (req.session.user_id){
+  if (isUser(req.session.user_id)){
     let user_id = req.session.user_id;
     let templateVars = { user: users[user_id], urls: filter( urlDatabase, user_id)};
     res.render("urls_index", templateVars);
   } else {
+    req.session = null;
     res.status(403).send('You are not logged in');
   }
   
@@ -65,14 +66,24 @@ app.get("/urls/new", (req, res) => {
     let templateVars = { user: users[req.session.user_id]};
     res.render("urls_new", templateVars);
   } else {
+    req.session = null;
     res.redirect('/login');
   }
   
 });
 // Route of each short URL
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
-  res.render("urls_show", templateVars);
+  if (isUser(req.session.user_id)){
+    if (urlDatabase[req.params.shortURL]){
+      let templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
+      res.render("urls_show", templateVars);
+    } else {
+      res.status(403).send('This url does not exist')
+    }    
+  } else {
+    req.session = null;
+    res.status(403).send('You are not logged in');
+  }
 });
 // Add a new URL
 app.post("/urls/new", (req, res) => {
@@ -123,7 +134,7 @@ app.get("/login", (req, res) => {
 });
 app.post("/logout", (req, res) => {  
   //res.clearCookie('user_id');
-  req.session = null
+  req.session = null;
   res.redirect('/');
 });
 
