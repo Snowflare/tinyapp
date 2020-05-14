@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -68,18 +69,14 @@ app.post("/urls/new", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  //console.log(`Database: ${urlDatabase[req.params.shortURL].longURL}`);
   let longURL = urlDatabase[req.params.shortURL].longURL;
   
   res.redirect("http://" + longURL);
 });
 // Deleting a URL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  console.log(req.cookies["user-id"] === urlDatabase[req.params.shortURL].user_id);
-  
   if (req.cookies["user_id"] === urlDatabase[req.params.shortURL].user_id){
-    delete urlDatabase[req.params.shortURL]; 
-    
+    delete urlDatabase[req.params.shortURL];     
   }
   res.redirect('/urls');
 });
@@ -117,6 +114,9 @@ app.post("/logout", (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
 });
+
+// Register end points
+
 app.get("/register", (req, res) => {
   let templateVars = { user: users[req.cookies["user_id"]]};
   res.render("urls_register", templateVars);
@@ -128,7 +128,9 @@ app.post("/register", (req, res) => {
       res.status(400).send("This email address has been used");
     }else {
       let id = generateRandomString();
-      users[id] = {id: id, email: req.body.email, password: req.body.password};
+      let password = req.body.password;      
+      let hashedPassword = bcrypt.hashSync(password, 10);
+      users[id] = {id: id, email: req.body.email, password: hashedPassword};
     
       res.cookie('user_id', id);
       res.redirect('/urls');
@@ -170,7 +172,7 @@ function isEmail(email){
 // Check if the email and password match
 function isPassword(email, password){
   for (let user in users){
-    if (users[user].email === email && users[user].password === password){
+    if (users[user].email === email && bcrypt.compareSync(password, users[user].password)){
       return true;
     }
   }
