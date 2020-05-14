@@ -55,7 +55,7 @@ app.get("/urls", (req, res) => {
     let templateVars = { user: users[user_id], urls: filter( urlDatabase, user_id)};
     res.render("urls_index", templateVars);
   } else {
-    //res.status(403).send('You are not logged in');
+    res.status(403).send('You are not logged in');
   }
   
 });
