@@ -31,7 +31,11 @@ app.set("view engine", "ejs");
 const urlDatabase = {};
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (req.session.user_id){
+    res.redirect('/urls');
+  }else {
+    res.redirect('/login');
+  }
 });
 
 app.listen(PORT, () => {
@@ -46,9 +50,14 @@ app.get("/hello", (req, res) => {
 });
 // Route of database
 app.get("/urls", (req, res) => {
-  let user_id = req.session.user_id;
-  let templateVars = { user: users[user_id], urls: filter( urlDatabase, user_id)};
-  res.render("urls_index", templateVars);
+  if (req.session.user_id){
+    let user_id = req.session.user_id;
+    let templateVars = { user: users[user_id], urls: filter( urlDatabase, user_id)};
+    res.render("urls_index", templateVars);
+  } else {
+    //res.status(403).send('You are not logged in');
+  }
+  
 });
 // Route of adding a URL
 app.get("/urls/new", (req, res) => {
@@ -97,7 +106,6 @@ app.post("/login", (req, res) => {
   
   if (isEmail(req.body.email)){
     if (isPassword(req.body.email, req.body.password)) {
-      //req.session.user_id = findId(req.body.email);
       req.session.user_id = getUserByEmail(req.body.email, users).id;
       res.redirect('/urls');
     } else {
