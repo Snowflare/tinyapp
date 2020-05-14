@@ -124,7 +124,7 @@ app.get("/login", (req, res) => {
 app.post("/logout", (req, res) => {  
   //res.clearCookie('user_id');
   req.session = null
-  res.redirect('/urls');
+  res.redirect('/');
 });
 
 // Register end points
