@@ -152,8 +152,13 @@ app.post("/login", (req, res) => {
   
 });
 app.get("/login", (req, res) => {
-  let templateVars = { user: users[req.session.user_id]};
-  res.render("urls_login", templateVars);
+  if (isUser(req.session.user_id, users)) {
+    res.redirect('/urls');
+  } else {
+    let templateVars = { user: users[req.session.user_id]};
+    res.render("urls_login", templateVars);
+  }
+  
 });
 app.post("/logout", (req, res) => {  
   //res.clearCookie('user_id');
