@@ -8,15 +8,18 @@ const bcrypt = require('bcrypt');
 const {getUserByEmail, isEmail, isUser, isPassword, generateRandomString, filter} = require("./helpers")
 const users = {};
 const urlDatabase = {};
+
+// Middleware
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
 }))
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan('combined'))
-
 app.set("view engine", "ejs");
 
+
+// Endpoints
 
 
 app.get("/", (req, res) => {
