@@ -10,8 +10,8 @@ function generateRandomString() {
   }
   return result;
 }
+// Return user object by email
 const getUserByEmail = function(email, database) {
-  // lookup magic...
   for (let user in database){
     if (database[user].email === email){
       return database[user];
@@ -57,4 +57,5 @@ function isEmail(email, users){
   }
   return false;
 }
+
 module.exports = {getUserByEmail, isEmail, isUser, isPassword, generateRandomString, filter};
