@@ -119,10 +119,25 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.shortURL].user_id){
-    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  } 
+  // if (req.session.user_id === urlDatabase[req.params.shortURL].user_id){
+  //   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+  // } 
   res.redirect('/urls');
+  if (isUser(req.session.user_id)){
+    if (urlDatabase[req.params.shortURL]){
+      if (urlDatabase[req.params.shortURL].user_id === req.session.user_id){
+        urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+      } else {
+        res.status('403').send('You do not have access to this url');
+        res.redirect('/urls');
+      }      
+    } else {
+      res.status(403).send('This url does not exist');
+    }    
+  } else {
+    req.session = null;
+    res.status(403).send('You are not logged in');
+  }
 });
 app.post("/login", (req, res) => {
   
