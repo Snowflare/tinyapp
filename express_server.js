@@ -118,7 +118,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/u/:shortURL/edit", (req, res) => {
+app.post("/urls/:shortURL", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL].user_id){
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
   } 
