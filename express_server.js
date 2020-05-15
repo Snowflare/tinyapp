@@ -6,19 +6,8 @@ const morgan = require('morgan');
 const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 const {getUserByEmail, isEmail, isUser, isPassword, generateRandomString, filter} = require("./helpers")
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-}
-
+const users = {};
+const urlDatabase = {};
 app.use(cookieSession({
   name: 'session',
   keys: ['key1', 'key2']
@@ -28,7 +17,7 @@ app.use(morgan('combined'))
 
 app.set("view engine", "ejs");
 
-const urlDatabase = {};
+
 
 app.get("/", (req, res) => {
   if (req.session.user_id){
