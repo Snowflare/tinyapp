@@ -91,9 +91,14 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 // Add a new URL
 app.post("/urls", (req, res) => {
-  let newShort = generateRandomString();
-  urlDatabase[newShort] = {longURL: req.body.longURL, user_id: req.session.user_id};
-  res.redirect(`/urls/${newShort}`);
+  if (isUser(req.session.user_id)){
+    let newShort = generateRandomString();
+    urlDatabase[newShort] = {longURL: req.body.longURL, user_id: req.session.user_id};
+    res.redirect(`/urls/${newShort}`);
+  } else {
+    req.session = null;
+    res.status(403).send('You are not logged in');
+  }  
 });
 
 app.get("/u/:shortURL", (req, res) => {
