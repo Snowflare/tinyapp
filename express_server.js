@@ -112,14 +112,24 @@ app.get("/u/:shortURL", (req, res) => {
 });
 // Deleting a URL
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.shortURL].user_id){
-    delete urlDatabase[req.params.shortURL];     
+  if (isUser(req.session.user_id, users)) {
+    if (urlDatabase[req.params.shortURL]) {
+      if (urlDatabase[req.params.shortURL].user_id === req.session.user_id) {
+        delete urlDatabase[req.params.shortURL]; 
+        res.redirect('/urls');
+      } else {
+        res.status(403).send('You do not have access to this url');
+      }      
+    } else {
+      res.status(403).send('This url does not exist');
+    }    
+  } else {
+    req.session = null;
+    res.status(403).send('You are not logged in');
   }
-  res.redirect('/urls');
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  res.redirect('/urls');
   if (isUser(req.session.user_id, users)) {
     if (urlDatabase[req.params.shortURL]) {
       if (urlDatabase[req.params.shortURL].user_id === req.session.user_id) {
