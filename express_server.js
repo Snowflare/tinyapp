@@ -3,8 +3,8 @@ const { getUserByEmail } = require("./helpers")
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
-//const cookieParser = require('cookie-parser');
-var cookieSession = require('cookie-session')
+const morgan = require('morgan');
+const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 const users = { 
   "userRandomID": {
@@ -24,7 +24,7 @@ app.use(cookieSession({
   keys: ['key1', 'key2']
 }))
 app.use(bodyParser.urlencoded({extended: true}));
-//app.use(cookieParser());
+app.use(morgan('combined'))
 
 app.set("view engine", "ejs");
 
@@ -79,7 +79,7 @@ app.get("/urls/:shortURL", (req, res) => {
         let templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
         res.render("urls_show", templateVars);
       } else {
-        res.status('403').send('You do not have access to this url');
+        res.status(403).send('You do not have access to this url');
       }      
     } else {
       res.status(403).send('This url does not exist');
@@ -119,17 +119,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  // if (req.session.user_id === urlDatabase[req.params.shortURL].user_id){
-  //   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-  // } 
   res.redirect('/urls');
-  if (isUser(req.session.user_id)){
-    if (urlDatabase[req.params.shortURL]){
-      if (urlDatabase[req.params.shortURL].user_id === req.session.user_id){
+  if (isUser(req.session.user_id)) {
+    if (urlDatabase[req.params.shortURL]) {
+      if (urlDatabase[req.params.shortURL].user_id === req.session.user_id) {
         urlDatabase[req.params.shortURL].longURL = req.body.longURL;
-      } else {
-        res.status('403').send('You do not have access to this url');
         res.redirect('/urls');
+      } else {
+        res.status(403).send('You do not have access to this url');
       }      
     } else {
       res.status(403).send('This url does not exist');
@@ -228,14 +225,6 @@ function isPassword(email, password){
   }
   return false;
 }
-// Find the id of a corresponding email
-// function findId(email){
-//   for (let user in users){
-//     if (users[user].email === email){
-//       return user;
-//     }
-//   }
-// }
 
 
 // Return the urls belongs to given id
