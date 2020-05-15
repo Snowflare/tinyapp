@@ -169,8 +169,13 @@ app.post("/logout", (req, res) => {
 // Register end points
 
 app.get("/register", (req, res) => {
-  let templateVars = { user: users[req.session.user_id]};
-  res.render("urls_register", templateVars);
+  if (isUser(req.session.user_id, users)) {
+    res.redirect('/urls');
+  } else {
+    let templateVars = { user: users[req.session.user_id]};
+    res.render("urls_register", templateVars);
+  }
+  
 });
 
 app.post("/register", (req, res) => {  
