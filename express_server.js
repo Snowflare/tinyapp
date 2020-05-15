@@ -1,11 +1,11 @@
 const express = require("express");
-const { getUserByEmail } = require("./helpers")
 const app = express();
 const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const morgan = require('morgan');
 const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
+const {getUserByEmail, isEmail, isUser, isPassword, generateRandomString, filter} = require("./helpers")
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
@@ -50,7 +50,7 @@ app.get("/hello", (req, res) => {
 });
 // Route of database
 app.get("/urls", (req, res) => {
-  if (isUser(req.session.user_id)){
+  if (isUser(req.session.user_id, users)){
     let user_id = req.session.user_id;
     let templateVars = { user: users[user_id], urls: filter( urlDatabase, user_id)};
     res.render("urls_index", templateVars);
@@ -62,7 +62,7 @@ app.get("/urls", (req, res) => {
 });
 // Route of adding a URL
 app.get("/urls/new", (req, res) => {
-  if (isUser(req.session.user_id)){
+  if (isUser(req.session.user_id, users)){
     let templateVars = { user: users[req.session.user_id]};
     res.render("urls_new", templateVars);
   } else {
@@ -73,7 +73,7 @@ app.get("/urls/new", (req, res) => {
 });
 // Route of each short URL
 app.get("/urls/:shortURL", (req, res) => {
-  if (isUser(req.session.user_id)){
+  if (isUser(req.session.user_id, users)){
     if (urlDatabase[req.params.shortURL]){
       if (urlDatabase[req.params.shortURL].user_id === req.session.user_id){
         let templateVars = { user: users[req.session.user_id], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL };
@@ -91,7 +91,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 // Add a new URL
 app.post("/urls", (req, res) => {
-  if (isUser(req.session.user_id)){
+  if (isUser(req.session.user_id, users)){
     let newShort = generateRandomString();
     urlDatabase[newShort] = {longURL: req.body.longURL, user_id: req.session.user_id};
     res.redirect(`/urls/${newShort}`);
@@ -120,7 +120,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL", (req, res) => {
   res.redirect('/urls');
-  if (isUser(req.session.user_id)) {
+  if (isUser(req.session.user_id, users)) {
     if (urlDatabase[req.params.shortURL]) {
       if (urlDatabase[req.params.shortURL].user_id === req.session.user_id) {
         urlDatabase[req.params.shortURL].longURL = req.body.longURL;
@@ -138,8 +138,8 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 app.post("/login", (req, res) => {
   
-  if (isEmail(req.body.email)){
-    if (isPassword(req.body.email, req.body.password)) {
+  if (isEmail(req.body.email, users)){
+    if (isPassword(req.body.email, req.body.password, users)) {
       req.session.user_id = getUserByEmail(req.body.email, users).id;
       res.redirect('/urls');
     } else {
@@ -170,7 +170,7 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {  
   if (req.body.email && req.body.password){
-    if (isEmail(req.body.email)){
+    if (isEmail(req.body.email, users)){
       res.status(400).send("This email address has been used");
     }else {
       let id = generateRandomString();
@@ -188,55 +188,7 @@ app.post("/register", (req, res) => {
   
 });
 
-// Helper functions
-//------------------------------------------------/
-// Random string generator
-function generateRandomString() {
-  var result           = '';
-  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for ( var i = 0; i < 6; i++ ) {
-      result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-// Check if user exists in the database
-function isUser(id){
-  if(users[id]){
-    return true;
-  }
-  return false;
-}
-
-// Check if email exists in the database
-function isEmail(email){
-  for (let user in users){
-    if (users[user].email === email){
-      return true;
-    }
-  }
-  return false;
-}
-// Check if the email and password match
-function isPassword(email, password){
-  for (let user in users){
-    if (users[user].email === email && bcrypt.compareSync(password, users[user].password)){
-      return true;
-    }
-  }
-  return false;
-}
 
 
-// Return the urls belongs to given id
-function filter( dataBase, id) {
-  let result = {};
 
-  for (key in dataBase) {
-      if (dataBase.hasOwnProperty(key) && dataBase[key].user_id === id) {
-          result[key] = dataBase[key];
-      }
-  }
-
-  return result;
-};
 
